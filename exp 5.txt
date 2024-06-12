@@ -1,0 +1,103 @@
+Experiment 5: Advanced SQL
+
+----1. Create a view of instructor without their salary called faculty.
+	
+CREATE VIEW facultY as select ID, name, dept_name FROM INSTRUCTOR;
+
+----2. Create a view of department salary tools.
+
+CREATE VIEW dept_sal_total AS SELECT dept_name, SUM(salary) as total_salary FROM INSTRUCTOR GROUP BY dept_name;
+
+SELECT * FROM dept_sal_total;
++------------+--------------+
+| dept_name  | total_salary |
++------------+--------------+
+| Comp. Sci. |       232000 |
+| Biology    |       138000 |
+| Finance    |       170000 |
+| Music      |        40000 |
+| Physics    |       182000 |
+| History    |       122000 |
+| Elec. Eng. |        80000 |
++------------+--------------+
+
+----3. Create a role of student.
+
+CREATE ROLE student;
+
+----4. Give select privileges on the view faculty to the role student.
+	
+GRANT SELECT ON faculty TO student;
+
+----5. Create a new user and assign her the role student.
+
+CREATE USER 'new_user' IDENTIFIED BY 'password';
+
+----6. Login as their new user and find all instructor in the biology department.
+
+select name from INSTRUCTOR where dept_name='Biology';
++-------+
+| name  |
++-------+
+| Smith |
+| Tom   |
+| Crick |
++-------+
+
+----7. Revoke privileges of the new user.
+
+revoke student from new_user;
+
+----8. Remove the role of student.
+
+drop role student;
+
+----9. Give select privileges on the view faculty to the new user.
+	
+grant select on facultY to new_user;
+
+----10. Login as this new user and find all instructors in the finance department.
+
+select * from INSTRUCTOR  where dept_name='Finance';
++-------+-------+-----------+--------+
+| ID    | name  | dept_name | salary |
++-------+-------+-----------+--------+
+| 12121 | Wu    | Finance   |  90000 |
+| 76543 | Singh | Finance   |  80000 |
++-------+-------+-----------+--------+
+
+----11. Login again as root user.
+
+Select host,user,plugin from mysql.user;
++-----------+------------------+-----------------------+
+| host      | user             | plugin                |
++-----------+------------------+-----------------------+
+| %         | new_user         | caching_sha2_password |
+| localhost | debian-sys-maint | caching_sha2_password |
+| localhost | mysql.infoschema | caching_sha2_password |
+| localhost | mysql.session    | caching_sha2_password |
+| localhost | mysql.sys        | caching_sha2_password |
+| localhost | new_user         | caching_sha2_password |
+| localhost | root             | mysql_native_password |
++-----------+------------------+-----------------------+
+
+
+----12. Create tables teachers 2 with same column as teaches but with additional constraint that the semester in one of fall, winter, spring or summer
+
+CREATE TABLE TEACHES2 (
+    ID INTEGER NOT NULL,
+	COURSE_ID VARCHAR(50) NOT NULL,
+	SEC_ID TEXT NOT NULL,
+	SEMESTER CHAR(50) NOT NULL CHECK (SEMESTER IN ('Fall', 'Winter', 'Spring', 'Summer')),
+	YEAR INT NOT NULL,
+	FOREIGN KEY (ID) REFERENCES EMPLOYEE(ID)
+     );
+     
+----13.Create index ID column of teaches. Compare the difference in time to obtain query results with or without index.
+
+create index teaches_id_index on TEACHES(ID);
+
+----14.Drop the index to free up the space.
+
+drop index teaches_id_index;
+
